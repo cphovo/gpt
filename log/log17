@@ -1,0 +1,134 @@
+https://bypass.churchless.tech/
+ask for answer(press Enter twice to finish): 
+
+生成一道编程题，涉及以下内容：
+[算法]
+前缀和、最小生成树
+[代码量]
+完成题目所需要编写的代码量在 60 行左右
+[难度]
+困难，题干在理解的逻辑难度上，一定要保证题目描述不能被一眼看出解法及考点，解法需要 15 分钟以上的思考
+[语言]
+Python，C++
+[场景]
+金融交易
+[核心]
+- 不要抄袭 LeetCode 等主流算法刷题平台的内容，生成的题目是原创的，具有挑战的
+- 具体详尽的业务场景和需求约束条件
+- 有相对复杂的边界情况需要处理
+- 题目可以体现出设计能力，最好是可以分部进行考察
+
+
+题目：金融交易网络优化
+
+描述：
+你是一家全球金融公司的首席技术官，该公司在全球拥有 N 个交易中心。每个交易中心都可以与其它交易中心进行交易，交易的速度取决于它们之间的交易链路速度。链路速度的单位为 Mbps（兆比特每秒）。
+
+每个交易中心都有自己的交易服务器，但只有一个交易中心的服务器可以处理交易请求。为了优化交易速度，公司决定升级某些交易链路，以便所有的交易中心可以通过最小生成树的方式将交易请求发送到处理交易的服务器。
+
+然而，升级交易链路会有成本，成本等于升级后的速度减去升级前的速度。为了控制成本，公司需要你制定一个升级计划。
+
+你的任务是，给定一个包含 N 个交易中心的网络和它们之间的链路，找到一个最小成本的升级计划，该计划可以让交易中心之间的链路构成一个最小生成树。并计算出前缀和数组，其中每个元素表示从第一个交易中心到当前交易中心的最小生成树的总成本。
+
+注意，你需要考虑以下几点：
+
+- 每个交易中心都必须通过最小生成树的方式连接到其它交易中心，且所有交易中心组成一个连通图。
+- 升级链路的成本不得超过10^9。
+- 你不能改变链路的方向，即不能改变交易请求的发送和接收方向。
+- 不是所有的链路都需要升级，只有那些在最小生成树中的链路可能需要升级。
+
+输入：
+- 一个整数 N，表示交易中心的数量 (2 ≤ N ≤ 10^5)。
+- N-1 行，每行包含三个整数 a, b, c，表示交易中心 a 和 b 之间的交易链路的当前速度为 c Mbps (1 ≤ a, b ≤ N, 1 ≤ c ≤ 10^9)。
+
+输出：
+- 一个包含 N-1 个整数的数组，表示从第一个交易中心到当前交易中心的最小生成树的总成本。
+
+注意：
+题目的难度在于理解如何从已存在的交易链路中构建最小生成树，以及如何计算前缀和数组。你需要对最小生成树和前缀和的算法有深入的理解。同时，对于极端的情况，如最大升级成本，也需要有相应的处理方式。
+
+题目可以分步解答，首先需要找到构建最小生成树的方法，然后计算升级成本，并构造前
+ask for answer(press Enter twice to finish): 
+参考答案（Python）：
+
+```python
+import heapq
+
+def solve(N, edges):
+    G = [[] for _ in range(N+1)]
+    for a, b, c in edges:
+        G[a].append((c, b))
+        G[b].append((c, a))
+
+    min_cost = [float('inf')] * (N+1)
+    min_cost[1] = 0
+    heap = [(0, 1)]
+    while heap:
+        cost, node = heapq.heappop(heap)
+        for c, neighbor in G[node]:
+            new_cost = max(cost, c)
+            if new_cost < min_cost[neighbor]:
+                min_cost[neighbor] = new_cost
+                heapq.heappush(heap, (new_cost, neighbor))
+    return [min_cost[i+1] - min_cost[i] for i in range(1, N)]
+```
+
+参考答案（C++）：
+
+```cpp
+#include <vector>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+vector<int> solve(int N, vector<vector<int>>& edges) {
+    vector<vector<pair<int, int>>> G(N+1);
+    for (auto& edge : edges) {
+        int a = edge[0], b = edge[1], c = edge[2];
+        G[a].push_back({c, b});
+        G[b].push_back({c, a});
+    }
+
+    vector<int> min_cost(N+1, INT_MAX);
+    min_cost[1] = 0;
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> heap;
+    heap.push({0, 1});
+    while (!heap.empty()) {
+        int cost = heap.top().first, node = heap.top().second;
+        heap.pop();
+        for (auto& [c, neighbor] : G[node]) {
+            int new_cost = max(cost, c);
+            if (new_cost < min_cost[neighbor]) {
+                min_cost[neighbor] = new_cost;
+                heap.push({new_cost, neighbor});
+            }
+        }
+    }
+    vector<int> prefix_sum(N-1);
+    for (int i = 1; i < N; ++i) {
+        prefix_sum[i-1] = min_cost[i+1] - min_cost[i];
+    }
+    return prefix_sum;
+}
+```
+
+测试数据：
+
+输入：
+
+5
+
+1 2 1
+
+1 3 3
+
+2 4 2
+
+2 5 3
+
+输出：
+
+[0, 2, 1, 0]
+
+ask for answer(press Enter twice to finish): 
