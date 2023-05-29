@@ -170,3 +170,7 @@
    The Fibonacci sequence is a famous mathematical sequence that has many interesting properties. It can be used to solve a variety of problems, including finding the golden ratio and calculating the number of ways to arrange a set of
    objects.
    ```
+
+## Thanks
+
+This demo reference [acheong08](https://github.com/acheong08)'s open source project, many thanks 🙏.
