@@ -6,7 +6,13 @@
    docker image build -t gpt-proxy:latest .
    ```
 
-2. Start services with docker compose.
+2. Copy your agent's configuration file to config.yaml
+   ```bash
+   cp config.yaml.example config.yaml
+   vim config.yaml
+   ```
+
+3. Start services with docker compose.
    ```bash
    # v2
    docker compose up -d
@@ -14,12 +20,12 @@
    docker-compose up -d
    ```
 
-3. Populate environment variables in the `.env` file
+4. Populate environment variables in the `.env` file
    ```bash
    cp example.env .env
    vim .env
    ```
-4. Run main.py and enter your question.
+5. Run main.py and enter your question.
    ```bash
    > pip install -r requirements.txt
    > python main.py
@@ -36,26 +42,26 @@
    ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    ```
 
-## Example
+## Examples
 
 1. translate
    ```bash
-   python main.py translate
-   Source [zh]: en
-   Target [en]: zh
+   > python main.py translate
+   > Source [zh]: en
+   > Target [en]: zh
    ask for answer(press Enter twice to finish):
-   how old are you?
+   > how old are you?
    你多大了？
    ```
 
 2. chatgpt
    ```python
-   python main.py chatgpt
-   Plus [y/N]:
+   > python main.py chatgpt
+   > Plus [y/N]:
    Using ChatGPT...
    http://127.0.0.1:19090/api/
    ask for answer(press Enter twice to finish):
-   如何使用 KMP 算法，请用 Python 为我详细举例解释，我很希望可以学会 KMP 算法
+   > 如何使用 KMP 算法，请用 Python 为我详细举例解释，我很希望可以学会 KMP 算法
 
    当然！KMP（Knuth-Morris-Pratt）算法是一种用于在文本中快速查找子串的字符串匹配算法。它通过利用已经匹配的信息，避免在文本中重复比较已经比较过的字符。
 
@@ -125,10 +131,10 @@
 
 3. bard
    ```bash
-   python main.py bard
+   > python main.py bard
    Using Google Bard...
    ask for answer(press Enter twice to finish):
-   implement fib method via python
+   > implement fib method via python
 
    Sure, here is the implementation of the Fibonacci sequence in Python:
 
