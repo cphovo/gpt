@@ -1,21 +1,30 @@
 version: '3.8'
 
 services:
+  # proxy
   clash:
     image: dreamacro/clash
     restart: always
     volumes:
       - ./config.yaml:/root/.config/clash/config.yaml:ro
-      # - ./ui:/ui:ro # dashboard volume
     ports:
       - "7890:7890"
       - "7891:7891"
-      # - "18080:8080" # The External Controller (RESTful API)
 
+  # cloudflare bypass 
   gpt-proxy:
-    image: cphovo/gpt-proxy
+    image: gpt-proxy
     restart: always
     ports:
       - 19090:9090
     environment:
-      - http_proxy=clash:7890
+      - http_proxy=http://clash:7890
+    depends_on:
+      - clash
+
+  # translate service
+  deepl:
+    image: missuo/deeplx:latest
+    restart: always
+    ports:
+      - 1188:1188

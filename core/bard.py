@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import re
 import string
@@ -6,13 +7,16 @@ import requests
 
 
 class Chatbot:
-    """A class to interact with Google Bard.
-
-    Args:
-    - session_id: str, The __Secure-1PSID cookie.
-    - proxy: str
-    - timeout: int, Request timeout in seconds.
-    - session: requests.Session, Requests session object.
+    """
+    A class to interact with Google Bard.
+    Parameters
+        session_id: str
+            The __Secure-1PSID cookie.
+        proxy: str
+        timeout: int
+            Request timeout in seconds.
+        session: requests.Session
+            Requests session object.
     """
 
     __slots__ = [
@@ -55,27 +59,73 @@ class Chatbot:
         self.SNlM0e = self.__get_snlm0e()
         self.timeout = timeout
 
+    def save_conversation(self, file_path: str, conversation_name: str):
+        conversations = self.load_conversations(file_path)
+        conversation_details = {
+            {
+                "conversation_name": conversation_name,
+                "_reqid": self._reqid,
+                "conversation_id": self.conversation_id,
+                "response_id": self.response_id,
+                "choice_id": self.choice_id,
+                "SNlM0e": self.SNlM0e,
+            },
+        }
+        conversations.append(conversation_details)
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(conversations, f, indent=4)
+
+    def load_conversations(self, file_path: str) -> list[dict]:
+        # Check if file exists
+        if not os.path.isfile(file_path):
+            return []
+        with open(file_path, encoding="utf-8") as f:
+            return json.load(f)
+
+    def load_conversation(self, file_path: str, conversation_name: str) -> bool:
+        """
+        Loads a conversation from history file. Returns whether the conversation was found.
+        """
+        conversations = self.load_conversations(file_path)
+        for conversation in conversations:
+            if conversation["conversation_name"] == conversation_name:
+                self._reqid = conversation["_reqid"]
+                self.conversation_id = conversation["conversation_id"]
+                self.response_id = conversation["response_id"]
+                self.choice_id = conversation["choice_id"]
+                self.SNlM0e = conversation["SNlM0e"]
+                return True
+        return False
+
     def __get_snlm0e(self):
+        # Find "SNlM0e":"<ID>"
         if not self.session_id or self.session_id[-1] != ".":
             raise Exception(
-                "__Secure-1PSID value must end with a single dot. Enter correct __Secure-1PSID value."
+                "__Secure-1PSID value must end with a single dot. Enter correct __Secure-1PSID value.",
             )
         resp = self.session.get(
-            "https://bard.google.com/", timeout=10, proxies=self.proxy
+            "https://bard.google.com/",
+            timeout=10,
+            proxies=self.proxy,
         )
         if resp.status_code != 200:
             raise Exception(
-                f"Response code not 200. Response Status is {resp.status_code}"
+                f"Response code not 200. Response Status is {resp.status_code}",
             )
         SNlM0e = re.search(r"SNlM0e\":\"(.*?)\"", resp.text)
         if not SNlM0e:
             raise Exception(
-                "SNlM0e value not found in response. Check __Secure-1PSID value."
+                "SNlM0e value not found in response. Check __Secure-1PSID value.",
             )
         return SNlM0e.group(1)
 
     def ask(self, message: str) -> dict:
-        """Send a message to Google Bard and return the response."""
+        """
+        Send a message to Google Bard and return the response.
+        :param message: The message to send to Google Bard.
+        :return: A dict containing the response from Google Bard.
+        """
         # url params
         params = {
             "bl": "boq_assistant-bard-web-server_20230523.13_p0",
@@ -107,8 +157,9 @@ class Chatbot:
         images = set()
         if len(json_chat_data) >= 3:
             if len(json_chat_data[4][0]) >= 4:
-                for img in json_chat_data[4][0][4]:
-                    images.add(img[0][0][0])
+                if json_chat_data[4][0][4]:
+                    for img in json_chat_data[4][0][4]:
+                        images.add(img[0][0][0])
         results = {
             "content": json_chat_data[0][0],
             "conversation_id": json_chat_data[1][0],
