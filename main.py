@@ -24,7 +24,7 @@ cloudfare_bypass = [
     "https://api.pawan.krd/backend-api/",
 ]
 
-base_url = random.choice(cloudfare_bypass)
+base_url = os.getenv("CHATGPT_BASE_URL") or random.choice(cloudfare_bypass)
 
 
 @app.command()

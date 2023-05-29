@@ -1,6 +1,8 @@
+version: '3.8'
+
 services:
   clash:
-    image: gdreamacro/clash
+    image: dreamacro/clash
     restart: always
     volumes:
       - ./config.yaml:/root/.config/clash/config.yaml:ro
@@ -8,5 +10,12 @@ services:
     ports:
       - "7890:7890"
       - "7891:7891"
-      # - "8080:8080" # The External Controller (RESTful API)
-    network_mode: "bridge"
+      # - "18080:8080" # The External Controller (RESTful API)
+
+  gpt-proxy:
+    image: cphovo/gpt-proxy
+    restart: always
+    ports:
+      - 19090:9090
+    environment:
+      - http_proxy=clash:7890
