@@ -28,7 +28,7 @@
 5. Run main.py and enter your question.
    ```bash
    > pip install -r requirements.txt
-   > python main.py
+   > python main.py --help
    Usage: main.py [OPTIONS] COMMAND [ARGS]...
 
    ─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────
