@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 from dotenv import load_dotenv
 from revChatGPT.V1 import Chatbot
@@ -100,8 +101,24 @@ def bard():
         print()
 
 
+class Language(str, Enum):
+    """Support language codes for translation.
+    
+    - zh: Chinese
+    - en: English
+    - ja: Japanese
+    - fr: French
+
+    Other language codes can be found at https://www.deepl.com/translator
+    """
+    zh = "zh"
+    en = "en"
+    ja = "ja"
+    fr = "fr"
+
+
 @app.command()
-def translate(source: Annotated[str, typer.Option("--source", "-s", prompt=True)] = "zh", target: Annotated[str, typer.Option("--target", "-t", prompt=True)] = "en"):
+def translate(source: Annotated[Language, typer.Option("--source", "-s", prompt=True, show_choices=False)] = "zh", target: Annotated[Language, typer.Option("--target", "-t", prompt=True, show_choices=False)] = "en"):
     console = Console()
     console.print("ask for answer(press Enter twice to finish): ",
                   style="bold green")
