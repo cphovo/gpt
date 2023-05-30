@@ -151,9 +151,9 @@
       """
 
       if n == 0 or n == 1:
-      return n
+          return n
       else:
-      return fib(n - 1) + fib(n - 2)
+          return fib(n - 1) + fib(n - 2)
 
 
    This function works by recursively calculating the Fibonacci numbers. The base cases are when n is 0 or 1, in which case the function simply returns n. Otherwise, the function returns the sum of the two previous Fibonacci numbers.
