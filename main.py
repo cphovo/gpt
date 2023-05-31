@@ -53,9 +53,12 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
 
         if text.strip() == "continue":
             chatbot.continue_write()
+            continue
 
         if text.strip() == "reset":
             chatbot.reset_chat()
+            console.print("I cleaned my brain, try new topic plz...", style="bold yellow")
+            continue
 
         if text.strip() == "exit":
             exit(0)
@@ -91,6 +94,7 @@ def bard():
 
         if text.strip() == "reset":
             chatbot = Bard(bard_session)
+            continue
 
         if text.strip() == "exit":
             exit(0)
