@@ -13,7 +13,7 @@ services:
 
   # cloudflare bypass 
   gpt-proxy:
-    image: gpt-proxy
+    image: cphovo/gpt-proxy:latest
     restart: always
     ports:
       - 19090:9090
