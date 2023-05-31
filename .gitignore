@@ -137,3 +137,5 @@ dmypy.json
 .vscode/
 log/**
 config.yaml
+
+mongo/

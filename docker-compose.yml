@@ -28,3 +28,15 @@ services:
     restart: always
     ports:
       - 1188:1188
+
+  # persistent
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ovo
+      MONGO_INITDB_ROOT_PASSWORD: ikuhasaki
