@@ -25,7 +25,7 @@ pymongo==4.3.3
 PySocks==1.7.1
 python-dotenv==1.0.0
 regex==2023.5.5
-requests==2.30.0
+requests==2.31.0
 revChatGPT==5.1.0
 rich==13.3.5
 shellingham==1.5.0.post1
