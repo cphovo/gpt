@@ -57,7 +57,8 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
 
         if text.strip() == "reset":
             chatbot.reset_chat()
-            console.print("I cleaned my brain, try new topic plz...", style="bold yellow")
+            console.print(
+                "I cleaned my brain, try new topic plz...", style="bold yellow")
             continue
 
         if text.strip() == "exit":
@@ -107,7 +108,7 @@ def bard():
 
 class Language(str, Enum):
     """Support language codes for translation.
-    
+
     - zh: Chinese
     - en: English
     - ja: Japanese
@@ -121,10 +122,22 @@ class Language(str, Enum):
     fr = "fr"
 
 
+@app.command(name="zh", help="Shortcut keys to translate Chinese to English.")
+def translate_zh_to_en():
+    print("Translate Chinese to English...")
+    translate()
+
+
+@app.command(name="en", help="Shortcut keys to translate English to Chinese.")
+def translate_en_to_zh():
+    print("Translate English to Chinese...")
+    translate("en", "zh")
+
+
 @app.command()
 def translate(source: Annotated[Language, typer.Option("--source", "-s", prompt=True, show_choices=False)] = "zh", target: Annotated[Language, typer.Option("--target", "-t", prompt=True, show_choices=False)] = "en"):
     console = Console()
-    console.print("ask for answer(press Enter twice to finish): ",
+    console.print("ask for answer(press Enter to finish): ",
                   style="bold green")
     text = input()
     response = translator(text, source, target)
