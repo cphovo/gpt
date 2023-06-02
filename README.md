@@ -42,7 +42,13 @@
    ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    ```
 
+<details>
+
+<summary>
+  
 ## Examples
+
+</summary>
 
 1. translate
    ```bash
@@ -170,6 +176,13 @@
    The Fibonacci sequence is a famous mathematical sequence that has many interesting properties. It can be used to solve a variety of problems, including finding the golden ratio and calculating the number of ways to arrange a set of
    objects.
    ```
+</details>
+
+## Todos
+
+- [ ] Use Mongo Persistence.
+- [ ] Add New Bing.
+- [ ] Use LangChain doing some interesting things.
 
 ## Thanks
 
