@@ -1,15 +1,16 @@
-from enum import Enum
 import os
+import typer
+import random
+from enum import Enum
 from dotenv import load_dotenv
 from revChatGPT.V1 import Chatbot
-from core.bard import Chatbot as Bard
+from rich import print
 from rich.console import Console
 from rich.markdown import Markdown
-from core.translate import translate as translator
-from rich import print
-import typer
+from core.bard import Chatbot as Bard
 from typing_extensions import Annotated
-import random
+from core.translate import translate as translator
+from core.utils import readlines
 
 app = typer.Typer()
 
@@ -27,10 +28,17 @@ cloudfare_bypass = [
 
 base_url = os.getenv("CHATGPT_BASE_URL") or random.choice(cloudfare_bypass)
 
+console = Console()
+
+
+CONTINUE_COMMAND = ["continue", ":c"]
+RESET_CONVERSATION_COMMAND = ["reset", ":r"]
+EXIT_COMMAND = ["exit", ":q!"]
+RE_ENTER_COMMAND = ':q'
+
 
 @app.command()
 def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = False):
-    console = Console()
     if plus:
         chatbot = Chatbot(
             config={"access_token": gpt_plus_access_token}, base_url=base_url)
@@ -39,30 +47,25 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
         chatbot = Chatbot(
             config={"access_token": gpt_access_token}, base_url=base_url)
         console.print("Using ChatGPT...", style="bold green")
-    print(chatbot.base_url)
+    print(f"proxy: {chatbot.base_url}")
     while True:
-        lines = []
-        console.print(
-            "ask for answer(press Enter twice to finish): ", style="bold green")
-        while True:
-            line = input()
-            if not line:
-                break
-            lines.append(line)
-        text = "\n".join(lines)
+        text = readlines()
 
-        if text.strip() == "continue":
+        if text.strip().lower() in CONTINUE_COMMAND:
             chatbot.continue_write()
             continue
 
-        if text.strip() == "reset":
+        if text.strip().lower() in RESET_CONVERSATION_COMMAND:
             chatbot.reset_chat()
             console.print(
                 "I cleaned my brain, try new topic plz...", style="bold yellow")
             continue
 
-        if text.strip() == "exit":
+        if text.strip().lower() in EXIT_COMMAND:
             exit(0)
+
+        if text.strip().endswith(RE_ENTER_COMMAND):
+            continue
 
         response = chatbot.ask(
             text, model='gpt-4') if plus else chatbot.ask(text)
@@ -80,25 +83,21 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
 @app.command()
 def bard():
     chatbot = Bard(bard_session)
-    console = Console()
     console.print("Using Google Bard...", style="bold green")
     while True:
-        lines = []
-        console.print(
-            "ask for answer(press Enter twice to finish): ", style="bold green")
-        while True:
-            line = input()
-            if not line:
-                break
-            lines.append(line)
-        text = "\n".join(lines)
+        text = readlines()
 
-        if text.strip() == "reset":
+        if text.strip().lower() in RESET_CONVERSATION_COMMAND:
+            console.print(
+                "I cleaned my brain, try new topic plz...", style="bold yellow")
             chatbot = Bard(bard_session)
             continue
 
-        if text.strip() == "exit":
+        if text.strip().lower() in EXIT_COMMAND:
             exit(0)
+
+        if text.strip().endswith(RE_ENTER_COMMAND):
+            continue
 
         response = chatbot.ask(text)
         console.print(Markdown(response["content"]))
@@ -136,9 +135,7 @@ def translate_en_to_zh():
 
 @app.command()
 def translate(source: Annotated[Language, typer.Option("--source", "-s", prompt=True, show_choices=False)] = "zh", target: Annotated[Language, typer.Option("--target", "-t", prompt=True, show_choices=False)] = "en"):
-    console = Console()
-    console.print("ask for answer(press Enter to finish): ",
-                  style="bold green")
+    console.print(">>> ", style="bold green", end="")
     text = input()
     response = translator(text, source, target)
     print(response)
