@@ -11,6 +11,7 @@ from core.bard import Chatbot as Bard
 from typing_extensions import Annotated
 from core.translate import translate as translator
 from core.utils import readlines
+from core.db import ChatGPTConversation, save_chat_gpt_conversation, get_chat_gpt_conversations, list_chat_gpt_conversations
 
 app = typer.Typer()
 
@@ -48,6 +49,8 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
             config={"access_token": gpt_access_token}, base_url=base_url)
         console.print("Using ChatGPT...", style="bold green")
     print(f"proxy: {chatbot.base_url}")
+    gen_title = True
+    title = ""
     while True:
         text = readlines()
 
@@ -59,6 +62,7 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
             chatbot.reset_chat()
             console.print(
                 "I cleaned my brain, try new topic plz...", style="bold yellow")
+            gen_title = True
             continue
 
         if text.strip().lower() in EXIT_COMMAND:
@@ -77,7 +81,56 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
             prev_text = data["message"]
 
         print()
-        chatbot.gen_title(chatbot.conversation_id, chatbot.parent_id)
+        if gen_title:
+            title = chatbot.gen_title(
+                chatbot.conversation_id, chatbot.parent_id)
+            gen_title = False
+        conv = ChatGPTConversation(
+            conversation_id=chatbot.conversation_id,
+            parent_id=chatbot.parent_id,
+            title=title,
+            plus=plus,
+            question=text,
+            content=prev_text
+        )
+        save_chat_gpt_conversation(conv)
+
+
+@app.command()
+def list(skip: Annotated[int, typer.Option("--skip", "-s", prompt=True)] = 0, limit: Annotated[int, typer.Option("--limit", "-l", prompt=True)] = 10):
+    convs = list_chat_gpt_conversations(skip, limit)
+    for conv in convs:
+        print(f"ID: {conv.id}")
+        print(f"Conversation ID: {conv.conversation_id}")
+        print(f"Parent ID: {conv.parent_id}")
+        print(f"Title: {conv.title}")
+        print(f"Plus: {conv.plus}")
+        print()
+
+
+@app.command()
+def detail(conversation_id: Annotated[str, typer.Option("--id", "-i", prompt=True)]):
+    convs = get_chat_gpt_conversations(conversation_id)
+    for conv in convs:
+        console.print(Markdown(f"# QUESTION \n{conv.question}"))
+        console.print(Markdown(f"# ANSWER \n{conv.content}"))
+        print()
+
+
+@app.command()
+def export(num: Annotated[int, typer.Option("--num", "-n", prompt=True)] = 20, path: Annotated[str, typer.Option("--path", "-p", prompt=True)] = "log/log.txt"):
+    conversation_ids = set(
+        [conv.conversation_id for conv in list_chat_gpt_conversations(0, num)])
+    content = []
+    for conversation_id in conversation_ids:
+        convs = get_chat_gpt_conversations(conversation_id)
+        for conv in convs:
+            content.append(f'{conv.question}\n')
+            content.append(f'{conv.content}\n')
+            content.append('---\n')
+    with open(path, 'a+') as f:
+        f.write("\n".join(content))
+    print('finished.')
 
 
 @app.command()
