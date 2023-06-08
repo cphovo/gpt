@@ -39,7 +39,8 @@ RE_ENTER_COMMAND = ':q'
 
 
 @app.command()
-def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = False):
+def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True, help="Paid or not.")] = False,
+            ignore: Annotated[bool, typer.Option("--ignore", "-i", help="If ignored, the data will not be saved.")] = False):
     if plus:
         chatbot = Chatbot(
             config={"access_token": gpt_plus_access_token}, base_url=base_url)
@@ -85,15 +86,16 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True)] = F
             title = chatbot.gen_title(
                 chatbot.conversation_id, chatbot.parent_id)
             gen_title = False
-        conv = ChatGPTConversation(
-            conversation_id=chatbot.conversation_id,
-            parent_id=chatbot.parent_id,
-            title=title,
-            plus=plus,
-            question=text,
-            content=prev_text
-        )
-        save_chat_gpt_conversation(conv)
+        if not ignore:
+            conv = ChatGPTConversation(
+                conversation_id=chatbot.conversation_id,
+                parent_id=chatbot.parent_id,
+                title=title,
+                plus=plus,
+                question=text,
+                content=prev_text
+            )
+            save_chat_gpt_conversation(conv)
 
 
 @app.command()
