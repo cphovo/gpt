@@ -180,8 +180,8 @@
 
 ## Todos
 
-- [ ] Use Mongo Persistence.
-- [ ] Add New Bing.
+- [x] Use Mongo Persistence.
+- [ ] ~~Add New Bing.~~
 - [ ] Use LangChain doing some interesting things.
 
 ## Thanks

@@ -139,3 +139,6 @@ log/**
 config.yaml
 
 mongo/
+tests/
+
+cookies.json
