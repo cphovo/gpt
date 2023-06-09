@@ -138,9 +138,12 @@ def export(num: Annotated[int, typer.Option("--num", "-n", prompt=True)] = 20, p
 
 
 @app.command()
-def bard():
+def bard(translate: Annotated[bool, typer.Option("--translate", "-t", help="If translate, the input will be translated into English.")] = False):
     chatbot = Bard(bard_session)
-    console.print("Using Google Bard...", style="bold green")
+    if translate:
+        console.print("Using Google Bard...\nYou can use Chinese input...", style="bold green")
+    else:
+        console.print("Using Google Bard...", style="bold green")
     while True:
         text = multi_input()
 
@@ -156,7 +159,7 @@ def bard():
         if text.strip().endswith(RE_ENTER_COMMAND):
             continue
 
-        response = chatbot.ask(text)
+        response = chatbot.ask(translator(text) if translate else text)
         console.print(Markdown(response["content"]))
         print(response["images"] if response["images"] else "")
         print()
