@@ -10,7 +10,7 @@ from rich.markdown import Markdown
 from core.bard import Chatbot as Bard
 from typing_extensions import Annotated
 from core.translate import translate as translator
-from core.utils import readlines
+from core.utils import multi_input
 from core.db import ChatGPTConversation, save_chat_gpt_conversation, get_chat_gpt_conversations, list_chat_gpt_conversations
 
 app = typer.Typer()
@@ -53,7 +53,7 @@ def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True, help
     gen_title = True
     title = ""
     while True:
-        text = readlines()
+        text = multi_input()
 
         if text.strip().lower() in CONTINUE_COMMAND:
             chatbot.continue_write()
@@ -106,6 +106,8 @@ def list(skip: Annotated[int, typer.Option("--skip", "-s", prompt=True)] = 0, li
         print(f"Conversation ID: {conv.conversation_id}")
         print(f"Parent ID: {conv.parent_id}")
         print(f"Title: {conv.title}")
+        print(
+            f"Created At: {conv.created_at if conv.created_at else 'Unknown'}")
         print(f"Plus: {conv.plus}")
         print()
 
@@ -140,7 +142,7 @@ def bard():
     chatbot = Bard(bard_session)
     console.print("Using Google Bard...", style="bold green")
     while True:
-        text = readlines()
+        text = multi_input()
 
         if text.strip().lower() in RESET_CONVERSATION_COMMAND:
             console.print(
@@ -190,8 +192,7 @@ def translate_en_to_zh():
 
 @app.command()
 def translate(source: Annotated[Language, typer.Option("--source", "-s", prompt=True, show_choices=False)] = "zh", target: Annotated[Language, typer.Option("--target", "-t", prompt=True, show_choices=False)] = "en"):
-    console.print(">>> ", style="bold green", end="")
-    text = input()
+    text = multi_input()
     response = translator(text, source, target)
     print(response)
 
