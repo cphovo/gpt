@@ -41,6 +41,8 @@ RE_ENTER_COMMAND = ':q'
 @app.command()
 def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True, help="Paid or not.")] = False,
             ignore: Annotated[bool, typer.Option("--ignore", "-i", help="If ignored, the data will not be saved.")] = False):
+    # !ChatGPT Plus may report an error, but the regular version of ChatGPT is fine.
+    # TODO: to be repaired. (but need to wait for the revChatGPT package to be fixed)
     if plus:
         chatbot = Chatbot(
             config={"access_token": gpt_plus_access_token}, base_url=base_url)
@@ -137,11 +139,20 @@ def export(num: Annotated[int, typer.Option("--num", "-n", prompt=True)] = 20, p
     print('finished.')
 
 
+# If you are in mainland China, you will need a proxy to use Bard.
+# Also, you need to expose the clash port in docker-compose.yml.
+proxies = {
+    "http://": "http://127.0.0.1:7890",
+    "https://": "http://127.0.0.1:7890",
+}
+
+
 @app.command()
 def bard(translate: Annotated[bool, typer.Option("--translate", "-t", help="If translate, the input will be translated into English.")] = False):
-    chatbot = Bard(bard_session)
+    chatbot = Bard(bard_session, proxies)
     if translate:
-        console.print("Using Google Bard...\nYou can use Chinese input...", style="bold green")
+        console.print(
+            "Using Google Bard...\nYou can use Chinese input...", style="bold green")
     else:
         console.print("Using Google Bard...", style="bold green")
     while True:
@@ -150,7 +161,7 @@ def bard(translate: Annotated[bool, typer.Option("--translate", "-t", help="If t
         if text.strip().lower() in RESET_CONVERSATION_COMMAND:
             console.print(
                 "I cleaned my brain, try new topic plz...", style="bold yellow")
-            chatbot = Bard(bard_session)
+            chatbot = Bard(bard_session, proxies)
             continue
 
         if text.strip().lower() in EXIT_COMMAND:
