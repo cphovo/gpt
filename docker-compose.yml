@@ -8,9 +8,9 @@ services:
     volumes:
       - ./config.yaml:/root/.config/clash/config.yaml:ro
     # if you wish to use this agent in the console, you need to expose the following ports
-    # ports:
-    #   - "7890:7890"
-    #   - "7891:7891"
+    ports:
+      - "7890:7890"
+      - "7891:7891"
 
   # cloudflare bypass 
   gpt-proxy:
