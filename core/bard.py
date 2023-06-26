@@ -105,20 +105,41 @@ class AsyncChatbot:
         instance.SNlM0e = await instance.__get_snlm0e()
         return instance
 
-    async def save_conversation(self, file_path: str, conversation_name: str):
-        conversations = self.load_conversations(file_path)
-        conversation_details = {
-            {
+    async def save_conversation(self, file_path: str, conversation_name: str) -> None:
+        """
+        Saves conversation to the file
+        :param file_path: file to save (json)
+        :param conversation_name: any name of current conversation (unique one)
+        :return: None
+        """
+        # Load conversations from file
+        conversations = await self.load_conversations(file_path)
+
+        # Update existing one
+        conversation_exists = False
+        for conversation in conversations:
+            if conversation["conversation_name"] == conversation_name:
+                conversation["conversation_name"] = conversation_name
+                conversation["_reqid"] = self._reqid
+                conversation["conversation_id"] = self.conversation_id
+                conversation["response_id"] = self.response_id
+                conversation["choice_id"] = self.choice_id
+                conversation["SNlM0e"] = self.SNlM0e
+                conversation_exists = True
+
+        # Create conversation object
+        if not conversation_exists:
+            conversation = {
                 "conversation_name": conversation_name,
                 "_reqid": self._reqid,
                 "conversation_id": self.conversation_id,
                 "response_id": self.response_id,
                 "choice_id": self.choice_id,
                 "SNlM0e": self.SNlM0e,
-            },
-        }
-        conversations.append(conversation_details)
+            }
+            conversations.append(conversation)
 
+        # Save to the file
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(conversations, f, indent=4)
 
@@ -131,9 +152,12 @@ class AsyncChatbot:
 
     async def load_conversation(self, file_path: str, conversation_name: str) -> bool:
         """
-        Loads a conversation from history file. Returns whether the conversation was found.
+        Loads a conversation from history file. Returns whether the conversation was found
+        :param file_path: File with conversations (json)
+        :param conversation_name: unique conversation name
+        :return: True if the conversation was found
         """
-        conversations = self.load_conversations(file_path)
+        conversations = await self.load_conversations(file_path)
         for conversation in conversations:
             if conversation["conversation_name"] == conversation_name:
                 self._reqid = conversation["_reqid"]
@@ -174,7 +198,7 @@ class AsyncChatbot:
         """
         # url params
         params = {
-            "bl": "boq_assistant-bard-web-server_20230606.12_p0",
+            "bl": "boq_assistant-bard-web-server_20230620.14_p0",
             "_reqid": str(self._reqid),
             "rt": "c",
         }
@@ -219,7 +243,3 @@ class AsyncChatbot:
         self.choice_id = results["choices"][0]["id"]
         self._reqid += 100000
         return results
-
-
-if __name__ == "__main__":
-    print("Welcome to Google Bard Chatbot!")
