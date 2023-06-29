@@ -41,8 +41,6 @@ RE_ENTER_COMMAND = ':q'
 @app.command()
 def chatgpt(plus: Annotated[bool, typer.Option("--plus", "-p", prompt=True, help="Paid or not.")] = False,
             ignore: Annotated[bool, typer.Option("--ignore", "-i", help="If ignored, the data will not be saved.")] = False):
-    # !ChatGPT Plus may report an error, but the regular version of ChatGPT is fine.
-    # TODO: to be repaired. (but need to wait for the revChatGPT package to be fixed)
     if plus:
         chatbot = Chatbot(
             config={"access_token": gpt_plus_access_token}, base_url=base_url)
