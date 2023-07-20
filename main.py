@@ -19,7 +19,8 @@ load_dotenv()
 
 gpt_plus_access_token = os.getenv("ACCESS_TOKEN")
 gpt_access_token = os.getenv("CHATGPT_ACCESS_TOKEN")
-bard_session = os.getenv("BARD_SESSION")
+secure_1psid = os.getenv("SECURE_1PSID")
+secure_1psidts = os.getenv("SECURE_1PSIDTS")
 
 cloudfare_bypass = [
     "https://ai.fakeopen.com/api/",
@@ -147,7 +148,7 @@ proxies = {
 
 @app.command()
 def bard(translate: Annotated[bool, typer.Option("--translate", "-t", help="If translate, the input will be translated into English.")] = False):
-    chatbot = Bard(bard_session, proxies)
+    chatbot = Bard(secure_1psid, secure_1psidts, proxies)
     if translate:
         console.print(
             "Using Google Bard...\nYou can use Chinese input...", style="bold green")
@@ -159,7 +160,7 @@ def bard(translate: Annotated[bool, typer.Option("--translate", "-t", help="If t
         if text.strip().lower() in RESET_CONVERSATION_COMMAND:
             console.print(
                 "I cleaned my brain, try new topic plz...", style="bold yellow")
-            chatbot = Bard(bard_session, proxies)
+            chatbot = Bard(secure_1psid, secure_1psidts, proxies)
             continue
 
         if text.strip().lower() in EXIT_COMMAND:

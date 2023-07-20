@@ -17,13 +17,14 @@ class Chatbot:
 
     def __init__(
         self,
-        session_id: str,
+        secure_1psid: str,
+        secure_1psidts: str,
         proxy: dict = None,
         timeout: int = 20,
     ):
         self.loop = asyncio.get_event_loop()
         self.async_chatbot = self.loop.run_until_complete(
-            AsyncChatbot.create(session_id, proxy, timeout),
+            AsyncChatbot.create(secure_1psid, secure_1psidts, proxy, timeout),
         )
 
     def save_conversation(self, file_path: str, conversation_name: str):
@@ -64,14 +65,16 @@ class AsyncChatbot:
         "response_id",
         "choice_id",
         "proxy",
-        "session_id",
+        "secure_1psidts",
+        "secure_1psid",
         "session",
         "timeout",
     ]
 
     def __init__(
         self,
-        session_id: str,
+        secure_1psid: str,
+        secure_1psidts: str,
         proxy: dict = None,
         timeout: int = 20,
     ):
@@ -88,20 +91,27 @@ class AsyncChatbot:
         self.conversation_id = ""
         self.response_id = ""
         self.choice_id = ""
-        self.session_id = session_id
+        self.secure_1psid = secure_1psid
+        self.secure_1psidts = secure_1psidts
         self.session = httpx.AsyncClient(proxies=self.proxy)
         self.session.headers = headers
-        self.session.cookies.set("__Secure-1PSID", session_id)
+        self.session.cookies.set("__Secure-1PSID", secure_1psid)
+        if secure_1psidts:
+            self.session.cookies.set("__Secure-1PSIDTS", secure_1psidts)
         self.timeout = timeout
 
     @classmethod
     async def create(
         cls,
-        session_id: str,
+        secure_1psid: str,
+        secure_1psidts: str,
         proxy: dict = None,
         timeout: int = 20,
     ) -> "AsyncChatbot":
-        instance = cls(session_id, proxy, timeout)
+        """
+        Async constructor.
+        """
+        instance = cls(secure_1psid, secure_1psidts, proxy, timeout)
         instance.SNlM0e = await instance.__get_snlm0e()
         return instance
 
@@ -170,9 +180,12 @@ class AsyncChatbot:
 
     async def __get_snlm0e(self):
         # Find "SNlM0e":"<ID>"
-        if not self.session_id or self.session_id[-1] != ".":
+        if (
+            not (self.secure_1psid and self.secure_1psidts)
+            or self.secure_1psid[-1] != "."
+        ):
             raise Exception(
-                "__Secure-1PSID value must end with a single dot. Enter correct __Secure-1PSID value.",
+                "Enter correct __Secure-1PSID and __Secure-1PSIDTS value. __Secure-1PSID value must end with a single dot. ",
             )
         resp = await self.session.get(
             "https://bard.google.com/",
@@ -198,7 +211,7 @@ class AsyncChatbot:
         """
         # url params
         params = {
-            "bl": "boq_assistant-bard-web-server_20230620.14_p0",
+            "bl": "boq_assistant-bard-web-server_20230713.13_p0",
             "_reqid": str(self._reqid),
             "rt": "c",
         }
@@ -230,7 +243,7 @@ class AsyncChatbot:
                     for img in json_chat_data[4][0][4]:
                         images.append(img[0][0][0])
         results = {
-            "content": json_chat_data[0][0],
+            "content": json_chat_data[4][0][1][0],
             "conversation_id": json_chat_data[1][0],
             "response_id": json_chat_data[1][1],
             "factualityQueries": json_chat_data[3],
